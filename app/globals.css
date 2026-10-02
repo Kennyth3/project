@@ -200,7 +200,7 @@ body {
 
   .nav-links a,
   .user-info {
-    color: white;
+    color: rgb(255, 0, 0);
     display: block;
     width: 100%;
     text-align: left;
@@ -231,11 +231,11 @@ body {
 .auth-card {
   width: 100%;
   max-width: 400px;
-  background: white;
+  background: rgb(255, 255, 255);
   padding: 40px 30px;
   border-radius: 16px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* เงาซอฟต์ลง ดูแพงขึ้น */
-  border: 1px solid #f3f4f6;
+  border: 1px solid #0156ff;
 }
 
 .auth-card h1 {
