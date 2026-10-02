@@ -1,25 +1,18 @@
 @import "tailwindcss";
 
-/* =========================================
-   CSS Variables (ตั้งค่าสีหลักเพื่อให้แก้ทีหลังง่าย)
-   ========================================= */
+/* กำหนดตัวแปรสีพื้นฐาน (ช่วยให้แก้สีทั้งเว็บได้ง่ายขึ้นในอนาคต) */
 :root {
-  --brand-yellow: #ecf807;
-  --brand-yellow-hover: #d4e006;
-  --text-dark: #111827;
-  --text-gray: #4b5563;
-  --bg-dark: #1a1a1a;
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
+  --bg-main: #f8fafc; /* พื้นหลังสีเทาอ่อนมาก ช่วยให้การ์ดขาวเด่นขึ้น */
+  --nav-bg: #0f172a; /* สีดำอมน้ำเงินนิดๆ ให้ดูพรีเมียม */
+  --text-dark: #1e293b;
+  --primary-color: #000000;
 }
 
-/* =========================================
-   Global Layout
-   ========================================= */
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
+  background-color: var(--bg-main);
+  color: var(--text-dark);
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -33,23 +26,15 @@ body {
   flex: 1;
 }
 
-.page {
-  max-width: 1200px;
-  margin: auto;
-  padding: 32px 20px;
-}
-
-/* =========================================
-   Navbar
-   ========================================= */
+/* --- Navbar --- */
 .navbar {
-  background: var(--brand-yellow);
-  color: var(--text-dark);
-  padding: 0.8rem 2rem;
+  background: var(--nav-bg);
+  color: rgb(255, 255, 255);
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 50;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* เพิ่มเงาให้ Navbar ดูลอยขึ้นจากเนื้อหา */
 }
 
 .container {
@@ -61,17 +46,20 @@ body {
 }
 
 .logo {
-  color: var(--text-dark);
+  color: rgb(252, 252, 252);
   font-size: 1.5rem;
-  font-weight: 800; /* หนาขึ้นให้ดูเป็นโลโก้ */
+  font-weight: 800;
   text-decoration: none;
-  letter-spacing: -0.05em;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
 }
 
-/* Navigation Links */
+.logo:hover {
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+}
+
 .nav-links {
   display: flex;
-  align-items: center;
   list-style: none;
   gap: 24px;
   margin: 0;
@@ -79,166 +67,154 @@ body {
 }
 
 .nav-links a {
-  color: var(--text-dark);
+  color: #cbd5e1; /* สีเทาอ่อน */
   text-decoration: none;
-  font-weight: 600;
-  position: relative;
-  transition: all 0.3s ease;
+  font-weight: 500;
+  display: inline-block;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Effect ขีดเส้นใต้ตอน Hover (สวยกว่าการขยายขนาด Font) */
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background-color: var(--text-dark);
-  transition: width 0.3s ease;
-}
-
-.nav-links a:hover::after {
-  width: 100%;
-}
-
+/* เอฟเฟกต์เวลาเมาส์ชี้เมนู: สว่างขึ้น ขยายขึ้น(แบบไม่ดันกัน) และมีแสงเรืองรอง */
 .nav-links a:hover {
-  opacity: 0.7;
-}
-
-/* User Info ใน Navbar */
-.user-info {
-  font-weight: 600;
-  color: var(--text-gray);
-  padding-right: 10px;
-  border-right: 2px solid rgba(0,0,0,0.1);
-}
-
-/* =========================================
-   Buttons (ปุ่มต่างๆ ใน Navbar)
-   ========================================= */
-.btn-logout {
-  background-color: var(--danger);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-logout:hover {
-  background-color: var(--danger-hover);
-  transform: translateY(-1px);
-}
-
-.btn-register {
-  background-color: var(--text-dark);
-  color: white !important; /* บังคับสีขาวทับสีดำของลิงก์ปกติ */
-  padding: 8px 16px;
-  border-radius: 6px;
-  transition: all 0.2s ease !important;
-}
-
-.btn-register::after {
-  display: none; /* เอาเอฟเฟกต์เส้นใต้ออกสำหรับปุ่ม */
-}
-
-.btn-register:hover {
-  background-color: #374151;
-  opacity: 1 !important;
+  color: #ffffff;
+  transform: scale(1.15); 
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
 .menu-btn {
   display: none;
   background: none;
   border: none;
-  color: var(--text-dark);
+  color: white;
   font-size: 1.8rem;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.3s;
 }
 
-.menu-btn:active {
-  transform: scale(0.9);
+.menu-btn:hover {
+  transform: scale(1.1);
 }
 
-/* =========================================
-   Mobile Navigation
-   ========================================= */
+/* Mobile Navbar */
 @media (max-width: 768px) {
   .menu-btn {
     display: block;
   }
 
   .nav-links {
+    display: none;
+    flex-direction: column;
+    background: var(--nav-bg);
     position: absolute;
     top: 70px;
     right: 20px;
-    background: var(--bg-dark);
-    width: 250px;
-    flex-direction: column;
-    padding: 20px;
+    width: 220px;
+    padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    gap: 16px;
-    
-    /* ซ่อนแบบมี Animation */
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   }
 
-  /* แสดงผลเมื่อมี class active */
   .nav-links.active {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-
-  .nav-links a,
-  .user-info {
-    color: rgb(255, 0, 0);
-    display: block;
-    width: 100%;
-    text-align: left;
-    border: none; /* เอาเส้นคั่น user-info ออกในมือถือ */
-  }
-
-  .nav-links a::after {
-    background-color: var(--brand-yellow);
-  }
-
-  .btn-logout {
-    width: 100%;
-    text-align: center;
+    display: flex;
   }
 }
 
-/* =========================================
-   Auth Pages (Login / Register)
-   ========================================= */
-.auth-page {
+/* --- Footer --- */
+.footer {
+  background-color: var(--nav-bg);
+  color: #94a3b8;
+  padding: 20px 15px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- Shared Form Styles (รวมสไตล์ input/button ซ้ำๆ เข้าด้วยกัน) --- */
+.card-input {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.card-input:focus {
+  outline: none;
+  border-color: #64748b;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1);
+}
+
+.card-button {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary-color);
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2);
+  background: #1f2937;
+}
+
+/* --- Layout & Cards --- */
+.page {
+  max-width: 1200px;
+  margin: auto;
+  padding: 40px 24px;
+} 
+
+/* การตั้งค่าการ์ดทั่วไป */
+.auth-page, .category-page {
   min-height: calc(100vh - 140px);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px; /* กันชนขอบจอมือถือ */
+  padding: 20px;
+}
+
+.auth-card, .category-card {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  /* เปลี่ยนเงาให้นุ่มและมีมิติขึ้น */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .auth-card {
   width: 100%;
   max-width: 400px;
-  background: rgb(255, 255, 255);
-  padding: 40px 30px;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08); /* เงาซอฟต์ลง ดูแพงขึ้น */
-  border: 1px solid #0156ff;
 }
 
-.auth-card h1 {
+.category-card {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* เอฟเฟกต์การ์ดลอยขึ้นเวลาชี้ */
+.auth-card:hover, .category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.auth-card h1, .category-card h1, .pro-card h1 {
   margin-top: 0;
   margin-bottom: 24px;
   text-align: center;
@@ -247,75 +223,100 @@ body {
   color: var(--text-dark);
 }
 
-.auth-card input {
-  width: 100%;
-  padding: 14px;
-  margin-bottom: 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 1rem;
-  box-sizing: border-box; /* ป้องกัน input ล้นขอบ card */
-  transition: all 0.2s;
+.auth-card input, .auth-card textarea, 
+.category-card input, .category-card textarea {
+  @extend .card-input; /* ถ้าใช้ Tailwind/Sass, ถ้าเป็น CSS ปกติแนะนำให้ใส่ class="card-input" ที่ HTML แทน */
+  /* Fallback สำหรับ CSS ธรรมดา: */
+  width: 100%; padding: 12px 16px; margin-bottom: 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; background: #f8fafc; transition: all 0.3s ease; box-sizing: border-box;
 }
 
-/* เอฟเฟกต์ตอนคลิกช่องกรอกข้อมูล */
-.auth-card input:focus {
-  outline: none;
-  border-color: #000;
-  box-shadow: 0 0 0 3px rgba(236, 248, 7, 0.5); /* เรืองแสงสีเหลืองบางๆ */
+.auth-card button, .category-card button {
+  /* Fallback สำหรับ CSS ธรรมดา: */
+  width: 100%; padding: 14px; background: var(--primary-color); color: rgb(255, 255, 255); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
 }
 
-.auth-card button {
+.auth-card button:hover, .category-card button:hover {
+  transform: translateY(-2px); box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2); background: #1f2937;
+}
+
+/* --- Pro Page & Card --- */
+.pro-page {
+  min-height: calc(100vh - 140px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.pro-card {
   width: 100%;
-  padding: 14px;
-  background: var(--text-dark); /* เปลี่ยนจากสีแดงเป็นดำเพื่อให้คุมโทนแบรนด์ */
+  max-width: 600px;
+  /* เปลี่ยนจากแดงสดแสบตา เป็นไล่สี Gradient พรีเมียมๆ */
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(255, 75, 43, 0.3); /* เงาสีแดงอ่อนๆ */
   color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 8px;
+  transition: transform 0.4s ease;
+}
+
+.pro-card:hover {
+  transform: translateY(-5px);
+}
+
+.pro-card h1 {
+  color: white;
+}
+
+.pro-card input, .pro-card textarea {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
   transition: all 0.3s;
+  box-sizing: border-box;
 }
 
-.auth-card button:hover {
-  background: #000;
+/* ทำให้ placeholder ของ pro-card เป็นสีขาวจางๆ */
+.pro-card input::placeholder, .pro-card textarea::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pro-card input:focus, .pro-card textarea:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: white;
+}
+
+.pro-card button {
+  width: 100%;
+  padding: 14px;
+  background: white;
+  color: #ff416c; /* ตัวอักษรสีแดง ให้เข้ากับพื้นหลัง */
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.pro-card button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: #fdfdfd;
 }
 
-.auth-card p {
-  text-align: center;
-  margin-top: 20px;
-  color: var(--text-gray);
-}
-
-.auth-card a {
-  color: #a1a904; /* สีเหลืองเข้มเพื่อให้อ่านออกบนพื้นขาว */
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.auth-card a:hover {
-  color: #000;
+.category-card a, .pro-card a {
+  color: inherit;
   text-decoration: underline;
+  transition: opacity 0.3s;
 }
 
-/* =========================================
-   Footer
-   ========================================= */
-.footer {
-  background-color: var(--brand-yellow);
-  color: var(--text-dark); /* แก้ให้อ่านง่าย */
-  padding: 24px 15px;
-  text-align: center;
-  font-weight: 500;
-  border-top: 1px solid rgba(0,0,0,0.05);
-}
-
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.category-card a:hover, .pro-card a:hover {
+  opacity: 0.8;
 }

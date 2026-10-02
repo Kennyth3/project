@@ -1,5 +1,4 @@
 import mongoose, { Model, Schema, Types } from "mongoose";
-import "./Category";
 
 export interface IProduct {
   name: string;
@@ -82,4 +81,5 @@ productSchema.index({
 });
 
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>("Product", productSchema);
+
 export default Product;

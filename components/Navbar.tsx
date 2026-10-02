@@ -1,6 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
+
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -10,29 +12,25 @@ type User = {
   role: "admin" | "user";
 };
 
+
 export default function Navbar() {
-  const router = useRouter();
-  const pathname = usePathname();
-  
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true); // เพิ่ม Loading State
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // 1. โหลดข้อมูล User และจัดการ Loading
+  const router = useRouter();
+  const pathname = usePathname();
+  const [user, setUser] = useState<User | null>(null);
+  // const [open, setOpen] = useState(false);
+
+  // Refresh user state when route changes, because Navbar stays mounted in the root layout.
   useEffect(() => {
     let ignore = false;
 
     async function loadUser() {
-      try {
-        const res = await fetch("/api/auth/me", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (!ignore) setUser(data.user);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user", error);
-      } finally {
-        if (!ignore) setIsLoading(false); // โหลดเสร็จแล้ว
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
+      const data = await res.json();
+
+      if (!ignore) {
+        setUser(data.user);
       }
     }
 
@@ -43,12 +41,7 @@ export default function Navbar() {
     };
   }, [pathname]);
 
-  // 2. ปิดเมนูมือถืออัตโนมัติเมื่อเปลี่ยนหน้า (UX Improvement)
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  // 3. รับฟัง Custom Event สำหรับ Auth
+  // Login/logout pages dispatch this event so Navbar updates immediately without a full reload.
   useEffect(() => {
     function handleAuthChange(event: Event) {
       const authEvent = event as CustomEvent<{ user: User | null }>;
@@ -56,12 +49,19 @@ export default function Navbar() {
     }
 
     window.addEventListener("auth-change", handleAuthChange);
-    return () => window.removeEventListener("auth-change", handleAuthChange);
+
+    return () => {
+      window.removeEventListener("auth-change", handleAuthChange);
+    };
   }, []);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+
     setUser(null);
+    // Keep all mounted auth-aware components in sync after logout.
     window.dispatchEvent(
       new CustomEvent("auth-change", { detail: { user: null } })
     );
@@ -69,4 +69,85 @@ export default function Navbar() {
     router.refresh();
   }
 
-  return
+
+  return (
+    <nav className="navbar">
+      <div className="container">
+        <Link href="/" className="logo">
+          Kennyth Project SHOP
+          โดย นายปัญจธิษณ์ และ นายศุภวัช
+        </Link>
+
+        <button className="menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
+          ☰
+        </button>
+
+        <ul className={menuOpen ? "nav-links active" : "nav-links"}>
+          <li>
+            <Link href="/">หน้าหลัก</Link>
+          </li>
+          <li>
+            <Link href="/about">เกี่ยวกับเรา</Link>
+          </li>
+           <li>
+            <Link href="/products">สินค้า</Link>
+          </li>
+          <li>
+            <Link href="/blogs">บทความ</Link>
+          </li>
+
+          {user && (
+            <li>
+              <Link href="/dashboard">Dashboard</Link>
+            </li>
+          )}
+
+          {user?.role === "admin" && (
+            <>
+              <li>
+                <Link href="/admin/users">Admin</Link>
+              </li>
+              <li>
+                <Link href="/admin/blogs">Blog</Link>
+              </li>
+              <li>
+                <Link href="/admin/categories">เพิ่มหมวดหมู่</Link>
+              </li>
+              <li>
+                <Link href="/admin/products">เพิ่มสินค้า</Link>
+              </li>
+            </>
+          )}
+
+          {!user ? (
+            <>
+              <li>
+                <Link href="/login">Login</Link>
+              </li>
+              <li>
+                <Link href="/register" className="btn-register">
+                  Register
+                </Link>
+              </li>
+            </>
+          ) : (
+            <>
+              <li className="user-info">
+                {user.name} ({user.role})
+              </li>
+              <li>
+                <Link href="/profile">Profile</Link>
+              </li>
+              <li>
+                <button onClick={logout} className="btn-logout">
+                  Logout
+                </button>
+              </li>
+            </>
+          )}
+
+        </ul>
+      </div>
+    </nav>
+  );
+}

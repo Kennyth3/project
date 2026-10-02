@@ -1,142 +1,125 @@
-"use client";
+import { NextResponse } from "next/server";
+import cloudinary from "@/lib/cloudinary";
 
-import { FormEvent, useState } from "react";
+export const runtime = "nodejs";
 
-function createSlug(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9ก-๙-]/g, "");
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+const allowedTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/jpg",
+  "image/webp",
+];
+
+function getUploadErrorStatus(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "http_code" in error &&
+    typeof error.http_code === "number"
+  ) {
+    const { http_code: httpCode } = error;
+
+    // Keep client errors from Cloudinary intact. Turning a permission error into
+    // 502 obscures the actual cause and makes it look like our API is down.
+    if (httpCode >= 400 && httpCode < 500) {
+      return httpCode;
+    }
+  }
+
+  return 502;
 }
 
-import dynamic from "next/dynamic";
+export async function POST(request: Request) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file");
 
-const BlogEditor = dynamic(
-  () => import("@/components/BlogEditor"),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="border rounded-lg p-6">
-        กำลังโหลด Editor...
-      </div>
-    ),
-  }
-);
-
-export default function NewBlogPage() {
-  const [title, setTitle] = useState<string>("");
-  const [slug, setSlug] = useState<string>("");
-  const [content, setContent] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-
-    if (!title.trim()) {
-      alert("กรุณากรอกชื่อบทความ");
-      return;
-    }
-
-    if (!content.trim()) {
-      alert("กรุณากรอกเนื้อหาบทความ");
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const response = await fetch("/api/blogs", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          slug,
-          content,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "สร้างบทความไม่สำเร็จ"
-        );
-      }
-
-      alert("สร้างบทความสำเร็จ");
-
-      setTitle("");
-      setSlug("");
-      setContent("");
-    } catch (error) {
-      console.error(error);
-
-      alert(
-        error instanceof Error
-          ? error.message
-          : "เกิดข้อผิดพลาด"
+    if (!(file instanceof File)) {
+      return NextResponse.json(
+        { message: "ไม่พบไฟล์ภาพ" },
+        { status: 400 }
       );
-    } finally {
-      setLoading(false);
     }
+
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        {
+          message: "รองรับเฉพาะไฟล์ JPG, PNG และ WEBP",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        {
+          message: "ไฟล์ต้องมีขนาดไม่เกิน 5 MB",
+        },
+        { status: 400 }
+      );
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const result = await new Promise<{
+      secure_url: string;
+      public_id: string;
+    }>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "ecommerce/products",
+          resource_type: "image",
+          transformation: [
+            {
+              width: 1200,
+              height: 1200,
+              crop: "limit",
+            },
+            {
+              quality: "auto",
+              fetch_format: "auto",
+            },
+          ],
+        },
+        (error, uploadResult) => {
+          if (error || !uploadResult) {
+            reject(error ?? new Error("อัปโหลดรูปไม่สำเร็จ"));
+            return;
+          }
+
+          resolve({
+            secure_url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+          });
+        }
+      );
+
+      uploadStream.end(buffer);
+    });
+
+    return NextResponse.json({
+      message: "อัปโหลดรูปสำเร็จ",
+      imageUrl: result.secure_url,
+      imagePublicId: result.public_id,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+
+    const status = getUploadErrorStatus(error);
+
+    return NextResponse.json(
+      {
+        message:
+          status === 401
+            ? "ไม่สามารถยืนยันตัวตนกับ Cloudinary ได้ โปรดตรวจสอบ API key และ API secret"
+            : status === 403
+              ? "Cloudinary ไม่อนุญาตให้ API key นี้อัปโหลดรูป โปรดตรวจสอบสิทธิ์ Upload ของ API key หรือการตั้งค่า Security ใน Cloudinary"
+              : "เกิดข้อผิดพลาดในการอัปโหลดรูป",
+      },
+      { status }
+    );
   }
-
-  return (
-    <main className="max-w-5xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">
-        สร้างบทความ
-      </h1>
-
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-6"
-      >
-        {/* Title */}
-        <div>
-          <label className="block mb-2 font-medium">
-            ชื่อบทความ
-          </label>
-
-          <input
-            type="text"
-            value={title}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              setSlug(createSlug(event.target.value));
-            }}
-            placeholder="ชื่อบทความ"
-            className="w-full border rounded-lg px-4 py-3"
-          />
-        </div>
-
-        {/* Content */}
-        <div>
-          <label className="block mb-2 font-medium">
-            เนื้อหาบทความ
-          </label>
-
-          <BlogEditor
-            value={content}
-            onChange={setContent}
-          />
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-6 py-3 rounded-lg bg-black text-white disabled:opacity-50"
-        >
-          {loading
-            ? "กำลังบันทึก..."
-            : "บันทึกบทความ"}
-        </button>
-      </form>
-    </main>
-  );
 }

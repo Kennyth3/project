@@ -1,10 +1,9 @@
-import { SignJWT, jwtVerify, type JWTPayload } from "jose";
+import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
 const secret = new TextEncoder().encode(process.env.JWT_SECRET);
 
-// The session cookie stores standard JWT claims plus our user fields.
-export async function createSession(payload: JWTPayload) {
+export async function createSession(payload: any) {
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("1d")
